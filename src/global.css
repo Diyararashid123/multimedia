@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto Serif:700|Roboto:400');
+
+*{
+
+    --text: #E4E4E4;
+    --text-secondary: #636161;
+    --background: #131313;
+    --action: #6C5CD6;
+    --accent: #898667;
+
+    
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+
+  
+:root {
+    color: var(--text);
+    background-color: var(--background);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    word-wrap: break-word;
+    font-size: clamp(12px, 1.25vw, 16px);
+}
+
+body{
+    background-color: var(--background);
+    font-family: 'Roboto';
+    font-weight: 400;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Roboto Serif';
+  font-weight: 700;
+}
+
+h1 {font-size: 4.210rem; /* 67.36px */}
+
+h2 {font-size: 3.158rem; /* 50.56px */}
+
+h3 {font-size: 2.369rem; /* 37.92px */}
+
+h4 {font-size: 1.777rem; /* 28.48px */}
+
+h5 {font-size: 1.333rem; /* 21.28px */}
+
+    
+button {
+  all:unset;
+  border: 1px solid var(--action);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  background-color: var(--secondary);
+  cursor: pointer;
+  padding: 1rem;
+}
+
+.box-shadow{
+  box-shadow: -2px -2px 6px -4px rgba(226, 224, 224, 0.5), 2px 2px 6px 4px rgba(0, 0, 0, 0.5);
+}
+
+.box-shadow-inwards{
+  box-shadow: -2px -2px 6px -4px rgba(226, 224, 224, 0.5) inset,
+  2px 2px 6px 4px rgba(0, 0, 0, 0.5) inset;
+}
