@@ -4,7 +4,7 @@ import { postsTable, usersTable } from "$lib/server/schema.js";
 import { eq } from "drizzle-orm";
 
 export const load = async ({ locals }) => {
-  const allPosts = await getPosts()
+  const allPosts = await getPosts(0)
 
   return {
     allPosts,

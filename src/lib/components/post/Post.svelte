@@ -91,7 +91,7 @@
       days = `${minutes}m`;
     } else if (difference < 86400000) { // Less than 1 day
       const hours = Math.floor(difference / 1000 / 60 / 60);
-      days = `${hours} h'}`;
+      days = `${hours} h`;
     } else { // 1 day or more
       const _days = Math.floor(difference / 1000 / 60 / 60 / 24);
       days = `${_days} d`;

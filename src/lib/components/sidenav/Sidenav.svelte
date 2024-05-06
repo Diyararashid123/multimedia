@@ -2,7 +2,10 @@
   import "../../../global.css";
   import SideBarBtn from "./SideBarBtn.svelte";
 
+
   export let user: string | undefined;
+
+
 </script>
 
 <ul class="box-shadow">
@@ -11,11 +14,10 @@
       <SideBarBtn imgRoute={"home.png"} name={"Home"} />
     </li></a
   >
-  <a href="/explore"
-    ><li class="icon-container">
-      <SideBarBtn imgRoute={"search.png"} name={"Explore"} />
-    </li></a
-  >
+  <a href="/explore-loading">
+  <li class="icon-container">
+    <SideBarBtn imgRoute={"search.png"} name={"Explore"} />
+  </li></a>
   <a href="/groups">
   <li class="icon-container">
     <SideBarBtn imgRoute={"inbox.png"} name={"Groups"} />

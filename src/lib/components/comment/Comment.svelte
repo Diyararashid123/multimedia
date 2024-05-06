@@ -44,11 +44,13 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="comment-container" on:click|self={navigateToComment}>
+    <a href={`/users/${comment.author.username}`} class="user-link">
     <div class="comment-author" on:click|self={navigateToComment}>
             <img class="profile-image" src={comment.author.profilePictureUrl} alt="Profile icon"/>
             <p class="author">{comment.author.username}</p>
             <p class="timestamp">{`.${"3"}d`}</p>
     </div>
+</a>
     <div class="comment-content">{comment.comment.comment}</div>
     <div class="icons-container">
         <div class="like-container">
@@ -62,7 +64,7 @@
             <p>{comment.comment.replyCount}</p>
         </div>
     </div>
-
+   
     {#if activeReply}
         <ReplyForm commentId={comment.comment.id} {postId}/>
     {/if}
@@ -119,5 +121,8 @@
         justify-content: center;
         align-items: center;
     }
-    
+    a{
+        text-decoration: none;
+        color: inherit;
+    }
 </style>
