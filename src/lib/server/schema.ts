@@ -67,7 +67,7 @@ export const postsTable = pgTable("posts",{
 	author: varchar("author",{
 		length: 24
 	}).notNull().references(()=>usersTable.id,{onDelete:"cascade"}),
-	timestamp: timestamp("timestamp"),
+	timestamp: timestamp("timestamp").defaultNow(),
 	viewCount: integer("view_count").default(0)
 })
 

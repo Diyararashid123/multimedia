@@ -9,7 +9,7 @@
   import Linebreak from "../Linebreak.svelte";
 
   export let post: PostWithProfile;
-  let days: number;
+  let days: string;
   let groups: typeof groupsTable.$inferSelect[]
   let postContainer: HTMLDivElement;
   let currentView: 'image' | 'video' ='image';
@@ -59,21 +59,43 @@
   onMount(async() => {
 
     const response = await fetch(`/api/postCategory?postId=${post.post.id}`);
-        const data = await response.json();
-        categories = data.data;
-    
-
-
-
+    const data = await response.json();
+    if(data.data[0].name) categories = data.data;
+        
     const req = await fetch("/api/groups")
     const res = await req.json()
     if(!res.error)  groups = res
 
-    const originalTime = post.post.timestamp!.getTime();
-    const currTime = new Date().getTime();
-    const diffHours = (currTime - originalTime) / 3600000;
+    let originalTime;
+    // IDK WHY ITS INCONSISTENT 
+    if (typeof post.post.timestamp === 'string') {
+      // If the timestamp is a string (e.g., ISO format)
+      originalTime = new Date(post.post.timestamp);
+    } else {
+      // If the timestamp is a Date object
+      originalTime = post.post.timestamp;
+    }
+    const currTime = new Date();
+    const originalTimeValue = post.post.timestamp!;
+    let time: number | undefined;
+    let difference: number;
 
-    days = Math.floor(diffHours / 24);
+    time = new Date(originalTimeValue).getTime();
+    difference = currTime.getTime() - time;
+
+    if (difference < 60000) { // Less than 1 minute
+      const minutes = Math.floor(difference / 1000 / 60);
+      days = `${minutes}m`;
+    } else if (difference < 3600000) { // Less than 1 hour
+      const minutes = Math.floor(difference / 1000 / 60);
+      days = `${minutes}m`;
+    } else if (difference < 86400000) { // Less than 1 day
+      const hours = Math.floor(difference / 1000 / 60 / 60);
+      days = `${hours} h'}`;
+    } else { // 1 day or more
+      const _days = Math.floor(difference / 1000 / 60 / 60 / 24);
+      days = `${_days} d`;
+    }
 
   });
 
@@ -118,8 +140,11 @@
           <p class="author">{post.author.username}</p>
         {/if}
       </a>
-
-      <p class="timestamp">{`.${days}d`}</p>
+      
+      {#if days}
+        <p class="timestamp">{`.${days}`}</p>
+      {/if}
+      
     </div>
 
     <PostSettings on:delete={deletePost} postId={post.post.id} {groups}/>

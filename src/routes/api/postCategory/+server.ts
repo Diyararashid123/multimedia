@@ -14,8 +14,6 @@ export const GET = async ({url}) => {
             .from(postsTable).where(eq(postsTable.id,post_id))
             .leftJoin(categoriesToPostsTable, eq(postsTable.id, categoriesToPostsTable.postId))
             .leftJoin(categoriesTable, eq(categoriesToPostsTable.categoryId, categoriesTable.id))
-            .execute();
-
        
             return json({success:true, data: postsWithCategories});
     

@@ -121,7 +121,6 @@ export const actions:Actions = {
       videoUrl: videoUrl,
       pictureUrl: imageUrl,
       author: session.userId,
-      timestamp: new Date(),
     };
 
     const req = await request.fetch("/api/ai/profanity", {

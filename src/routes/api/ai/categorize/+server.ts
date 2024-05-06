@@ -32,7 +32,7 @@ export const POST = async (request) => {
       {
         role: "system",
         content:
-          `You are going to categorize a post based on the sentiment it expresses. The categories are as following: ${categories}. The number of categories can be at most 3. Ensure that the sentiment(s) you give are expressed in only 1 word per sentiment.`,
+          `Categorize a post based on the sentiment it expresses using the following categories: ${categories}. Respond only with the applicable categories separated by commas or 'null' if no categories apply. Do not include any additional text or instructions in your response.`,
       },
       {
         role: "user",
@@ -49,6 +49,7 @@ export const POST = async (request) => {
   }
 
   const sentiments = _sentiments.split(",").map((el)=> el.trim())
+  if(sentiments[0] === "null") return json({error: true, message: "No suitable category found"})
 
   try {
     const categoryIds = await dbClient
