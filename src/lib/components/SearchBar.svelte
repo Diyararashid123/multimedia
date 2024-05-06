@@ -100,7 +100,6 @@
 
 <style>
   .search-form {
-    display: grid;
     width: 100%;
   }
 

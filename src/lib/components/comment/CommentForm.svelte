@@ -42,7 +42,6 @@
         background-color: var(--action);
         padding: 0.5rem 1rem;
         color: inherit;
-        width: 25%;
         justify-self: flex-end;
     }
 </style>

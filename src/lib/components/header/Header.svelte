@@ -8,7 +8,7 @@
 
 <header>
 
-  <img src="/images/icons/logo.png" alt="Website Logo" />
+  <a href="/"><img src="/images/icons/logo.png" alt="Website Logo" /></a>
   <div class="user-info">
     
     {#if !user}
@@ -56,5 +56,11 @@
   img{
     width: 6rem;
     margin-left: 1rem;
+  }
+
+  @media(max-width:968px){
+    header{
+      display: none;
+    }
   }
   </style>

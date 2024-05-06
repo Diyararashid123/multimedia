@@ -1,9 +1,7 @@
-import { redirect } from "@sveltejs/kit";
-
 import type { LayoutServerLoad } from "./$types";
 import { dbClient } from "$lib/server/db";
 import { groupMembers, groupsTable, notificationsTable, usersTable } from "$lib/server/schema";
-import { asc, eq, getTableColumns } from "drizzle-orm";
+import { asc, eq, and, getTableColumns } from "drizzle-orm";
 
 export const load: LayoutServerLoad = async (request) => {
 
@@ -22,7 +20,13 @@ export const load: LayoutServerLoad = async (request) => {
         user: {...rest}
       })
       .from(notificationsTable)
-      .where(eq(notificationsTable.targetUser, session.userId))
+      .where(
+        and(
+          eq(notificationsTable.targetUser, session.userId),
+          eq(notificationsTable.read, false)
+        )
+        
+      )
       .leftJoin(usersTable, eq(usersTable.id, notificationsTable.sourceUser))
       .orderBy(asc(notificationsTable.dateTime))
       .limit(5);

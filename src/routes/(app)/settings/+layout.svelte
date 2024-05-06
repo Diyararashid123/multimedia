@@ -46,5 +46,11 @@
       grid-template-columns: repeat(1, 100%);
   }
 
+  @media(max-width: 1326px){
+    main{
+        grid-template-columns: repeat(1, 1fr);
+    }
+  }
+
 
 </style>

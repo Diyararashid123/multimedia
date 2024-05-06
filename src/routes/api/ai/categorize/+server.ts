@@ -16,18 +16,10 @@ const openai = new OpenAI({
 
 
 export const POST = async (request) => {
-  const session = request.locals.session;
-  if (!session) return json({ error: true, message: "Not logged in" });
 
-  const { postId } = await request.request.json();
-  const posts = await dbClient
-    .select({ content: postsTable.content })
-    .from(postsTable)
-    .where(eq(postsTable.id, postId));
+  const { postId, content } = await request.request.json();
 
-  if (posts.length === 0)
-    return json({ error: true, message: "Post not found" });
-
+  if(!postId || !content) return json({error: true, message: "Bad request"})
   const categorieRows = await dbClient.select({name: categoriesTable.name}).from(categoriesTable)
 
   if(categorieRows.length === 0) return json({error: true, message: "Error loading categories."})
@@ -44,7 +36,7 @@ export const POST = async (request) => {
       },
       {
         role: "user",
-        content: posts[0].content,
+        content: content,
       },
     ],
   });

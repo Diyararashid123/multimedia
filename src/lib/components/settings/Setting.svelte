@@ -1,7 +1,16 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import "../../../global.css";
   import Linebreak from "../Linebreak.svelte";
   import Settingsbar from "./Settingsbar.svelte";
+
+  let showLineBreak = true;
+
+  onMount(() => {
+    if (window.innerWidth < 1326) {
+      showLineBreak = false;
+    }
+  });
 </script>
 
 <ul class="box-shadow">
@@ -15,7 +24,9 @@
       />
     </li>
    </a>
+   {#if showLineBreak}
     <Linebreak />
+  {/if}
 
   <a href="/settings/usersetting">
     <li class="icon-container">
@@ -27,7 +38,10 @@
       />
     </li>
     </a
-  ><Linebreak />
+  >
+  {#if showLineBreak}
+    <Linebreak />
+  {/if}
 
   <a href="/settings/security">
     <li class="icon-container">
@@ -39,7 +53,10 @@
       />
     </li>
     </a
-  ><Linebreak />
+  >
+  {#if showLineBreak}
+    <Linebreak />
+  {/if}
 
   <a href="/settings/preferences">
     <li class="icon-container">
@@ -78,5 +95,15 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+  }
+
+  @media(max-width: 1326px) {
+    ul {
+      flex-direction: row;
+      width: 100%;
+      height: 100%;
+      flex-wrap: wrap;
+      box-shadow: none;
+    }
   }
 </style>

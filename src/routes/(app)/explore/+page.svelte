@@ -1,6 +1,7 @@
 <script lang="ts">
   export let data;
 
+  import LoadingSpinner from "$lib/components/LoadingSpinner.svelte";
   import Post from "$lib/components/post/Post.svelte";
   import Search from "$lib/components/search/Search.svelte";
 
@@ -12,7 +13,7 @@
   $: disableLeft = startIndex <= 0;
 
 
-  $: disableRight = startIndex + usersToShow >= data.allUsers.length;
+  $: disableRight = startIndex + usersToShow >= data.recommendedUsers.length;
 
   function moveRight() {
     if (!disableRight) startIndex += 1;
@@ -22,7 +23,7 @@
     if (!disableLeft) startIndex -= 1;
   }
 
-  $: visibleUsers = data.allUsers.slice(startIndex, startIndex + usersToShow);
+  $: visibleUsers = data.recommendedUsers.slice(startIndex, startIndex + usersToShow).map(r => r.user);
 </script>
 
 <Search />
@@ -36,13 +37,13 @@
   <div class="grid">
     {#each visibleUsers as user (user.username)}
     <a href={`/users/${user.username}`} class="user-link">
-      <div class="user" style="background-image: url({user.backgroungimg});">
+    <div class="user" style="background-image: url({user.profileBackgroundUrl});"> 
         <div class="info">
-          <img src={user.imageUrl} alt="{user.username}'s profile picture" />
+          <img src={user.profilePictureUrl} alt="{user.username}'s profile picture" /> 
           <p>{user.username}</p>
           <p class="bio">{user.bio && user.bio.length > 25 ? user.bio.slice(0, 25) + '...' : (user.bio ? user.bio : '')}</p>
         </div>
-      </div>
+    
     </a>
     {/each}
   </div>
@@ -54,15 +55,23 @@
   >&gt;</button>
 </div>
 
-{#if data.allUsers.length === 0}
+{#if data.recommendedUsers.length === 0}
   <p>No users found.</p>
 {/if}
 
+{#await data.streamed.allPosts}
+<LoadingSpinner/>
+{:then allPosts}
+
 <div class="posts-container">
-  {#each data.allPosts as post, i}
-    <Post {post} firstPost={i === 0} lastPost={i === data.allPosts.length - 1}/>
+  {#each allPosts as post, i}
+      {#if post}
+      <Post {post} firstPost={i === 0} lastPost={i === allPosts.length - 1} />
+      {/if}
   {/each}
 </div>
+
+{/await}
 
 <style>
 .container {

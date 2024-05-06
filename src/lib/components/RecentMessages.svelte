@@ -55,4 +55,10 @@
         border-radius: 8px;
     }
 
+      @media(max-width:1326px){
+            .recent-messages{
+                display: none;
+            }
+        }
+
 </style>

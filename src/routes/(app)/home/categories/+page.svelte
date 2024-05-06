@@ -15,3 +15,10 @@
     {/each}
 </div>
 {/if}
+
+<style>
+    .posts-container{
+        display: grid;
+        gap: 1rem;
+    }
+</style>

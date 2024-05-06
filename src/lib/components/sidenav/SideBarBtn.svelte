@@ -5,7 +5,7 @@
 
     export let imgRoute:string;
     export let name:string;
-    export let username: string | undefined = undefined;
+    export let username: string | undefined  = undefined;
 
     let currentLocation:string = "";
     let user: string | undefined;

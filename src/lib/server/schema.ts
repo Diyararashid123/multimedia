@@ -3,7 +3,7 @@ import { pgTable, bigint, varchar, timestamp, foreignKey, boolean, integer, chec
 
 
 export const notificationTypeOptions:[string, ...string[]] = [
-	"follow", "comment", "like", "post_like", "comment_like", "post"
+	"follow", "follow_request", "comment", "like", "post_like", "comment_like", "post"
 ]
 
 export const usersTable = pgTable("user", {
@@ -67,7 +67,8 @@ export const postsTable = pgTable("posts",{
 	author: varchar("author",{
 		length: 24
 	}).notNull().references(()=>usersTable.id,{onDelete:"cascade"}),
-	timestamp: timestamp("timestamp") 
+	timestamp: timestamp("timestamp"),
+	viewCount: integer("view_count").default(0)
 })
 
 export const commentsTable = pgTable("comments",{
@@ -203,3 +204,17 @@ export const groupPosts = pgTable("group_posts",{
 	group: varchar("group", {length: 255}).references(()=>groupsTable.id,{onDelete:"cascade", onUpdate:"cascade"}),
 	post: varchar("post",{length: 255}).references(()=>postsTable.id,{onDelete:"cascade", onUpdate:"cascade"})
 })
+
+
+export const userCategoryInteractionTable = pgTable("user_category_interaction", {
+  id: serial("id").primaryKey().notNull(),
+  userId: varchar("user_id", { length: 15 }).notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  categoryId: varchar("category_id", { length: 244 }).notNull().references(() => categoriesTable.id, { onDelete: "cascade" }),
+  interactionCount: integer("interaction_count").default(1),
+	postCategoryId:varchar("post_id").references(() => postsTable.id,{onDelete:"cascade", onUpdate:"cascade"}).notNull(),
+});
+
+export const authorizedDevicesTable = pgTable("authorized_devices", {
+	id: serial("id").primaryKey().notNull(),
+  	deviceToken: varchar("device_id", { length: 255 }).notNull()
+});

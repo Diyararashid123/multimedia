@@ -1,30 +1,44 @@
-<div class="container">
+<script lang="ts">
+  import AuthForm from "$lib/components/auth/AuthForm.svelte";
+
+</script>
+<div class="container box-shadow">
     <div class="header">
         <h1 ><a href="/register">Sign up</a></h1>
         <h2 class="active">Log in</h2>
       
     </div>
-    <form method="post" class="form">
-      
-        <input required type="text" name="username" placeholder="Username"/>
-        <input required type="password" name="password" placeholder="Password"/>
-        <button type="submit">Log In</button>
+        <AuthForm action="login"/>
         <div class="footer-links">
             <p><a href="/">Forgot Username</a></p>
             <p><a href="/">Reset Password</a></p>
         </div>
-    </form>
-</div>
+    </div>
+    
 
 <style>
 .container {
-    display: grid;
-    place-items: center;
-    height: 100%;
-    border: 1px solid hsl(240, 3.7%, 15.9%);
+    z-index: 1;
+    min-height: 50%;
     border-radius: 0.5rem;
-    width: 50%;
     justify-self: center;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border: 1px solid hsl(240, 3.7%, 15.9%);
+    position: relative;
+}
+
+.container::before{
+    content:"";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom:0;
+    right: 0;
+    opacity: 0.1;
+    background-color: black;
+    z-index: -1;
 }
 
 .header {
@@ -35,18 +49,15 @@
     width: 100%;
 }
 
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    width: 75%;
-    padding: 0.5rem;
-}
+
 
 .footer-links {
     display: flex;
-    justify-content: space-around;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 0rem 1rem;
+    font-size: 1.5rem;
+    margin-top: 1rem;
 }
 
 h1{
@@ -62,25 +73,8 @@ h2{
     letter-spacing: -0.025em;
 }
 
-input {
-    flex-grow: 1;
-    padding: 1rem;
-    border-radius: 1rem;
-    flex-basis: 90%;
-    height: auto;
-    box-shadow: -2px -2px 6px -4px rgba(226, 224, 224, 0.5) inset, 2px 2px 6px 4px rgba(0, 0, 0, 0.5) inset;
-    background-color: transparent;
-    border: none;
-    color: inherit;
-    font: inherit;
-    resize: none;
-    transition: border-radius 0.5s;
-}
-
 p {
     color: hsl(240, 5%, 64.9%);
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
 }
 
 a{
@@ -88,33 +82,37 @@ a{
     text-decoration: inherit;
 }
 
-button {
-        background-color: var(--action);
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 0.5rem;
-        font-family: inherit;
-        font-size: inherit;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
+
+.active{
+    position: relative;
+}
+
+.active::before{
+    content:"";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    bottom :-1rem;
+    height: 5rem;
+    transform: rotate(90deg); 
+    width: 100%;
+    background-color: var(--action);
+    filter: drop-shadow(0px 0px 5px rgba(108, 92, 214, 0.50));
+    width: 2px;
+}
+
+@media (min-width: 1024px){
+    .container {
+        font-size: 1rem;
+        width: 60%;
     }
 
-    .active{
-        position: relative;
+    .footer-links{
+        font-size: 1rem;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 0;
     }
 
-    .active::before{
-        content:"";
-        position: absolute;
-        top: 0;
-        left: 50%;
-        bottom :-1rem;
-        height: 5rem;
-        transform: rotate(90deg); 
-        width: 100%;
-        background-color: var(--action);
-        filter: drop-shadow(0px 0px 5px rgba(108, 92, 214, 0.50));
-        width: 2px;
-    }
+}
 </style>

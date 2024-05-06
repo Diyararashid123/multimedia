@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { toastStore } from "$lib/helpers/stores";
+    import { postOptionsStore, toastStore } from "$lib/helpers/stores";
     import type { groupsTable } from "$lib/server/schema";
     import { createEventDispatcher, onMount } from "svelte";
     import GroupItem from "../groups/GroupItem.svelte";
@@ -13,7 +13,11 @@
     const dispatch = createEventDispatcher()
     
     const toggleOptions = () =>{
-        showOptions = !showOptions
+        if($postOptionsStore.activePost===postId){
+            postOptionsStore.set({activePost: null})
+        }else{
+            postOptionsStore.set({activePost: postId})
+        }
     }
 
     const toggleGroups = () =>{
@@ -66,7 +70,7 @@
         ...
     </button>
 
-    {#if showOptions}
+    {#if $postOptionsStore.activePost === postId}
         <ul class="options box-shadow">
             <button on:click={copyLink}><li>Share Link</li></button>
             <button on:click={toggleGroups}><li>Send to group</li></button>
@@ -106,7 +110,7 @@
         position: relative;
         display: grid;
         width: 30%;
-        z-index: 9999;
+        z-index: 999;
     }
 
     ul{

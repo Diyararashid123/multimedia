@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { User } from '$lib/helpers/types'; 
+  import type { UserType } from '$lib/helpers/types'; 
   import Linebreak from '../Linebreak.svelte';
-  export let user: User;
+  export let user: UserType;
 </script>
 
 <div class="user" style="background-image: url({user.imageUrl});">

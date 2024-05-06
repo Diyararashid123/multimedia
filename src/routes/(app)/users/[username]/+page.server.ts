@@ -68,7 +68,6 @@ export const load = async (request) => {
     profileUser 
   };
 };
-
 export const actions = {
   follow: async (request) => {
     try {
@@ -88,31 +87,35 @@ export const actions = {
         return { status: 409, message: 'Follow request already sent or approved' };
       }
 
-      const followedUser = await dbClient
+      const followedUserResult = await dbClient
         .select()
         .from(usersTable)
         .where(ilike(usersTable.username, username));
       
-      if (followedUser.length === 0) {
+      if (followedUserResult.length === 0) {
         return { status: 404, message: 'User not found' };
       }
+
+      const followedUser = followedUserResult[0];
+      const isPublic = !followedUser.isPrivate;
+      const followStatus = isPublic ? 'approved' : 'pending'; 
 
       const rowId = uuidv4();
       await dbClient.insert(userFollowsTable).values({
         follower: session.userId,
-        following: followedUser[0].id,
-        status: 'pending',
+        following: followedUser.id,
+        status: followStatus,
         id: rowId,
       });
 
-      await insertNotification(session.userId, followedUser[0].id, rowId, "follow");
-      return { status: 200, message: 'Follow request sent' };
+      await insertNotification(session.userId, followedUser.id, rowId, "follow");
+      return { status: 200, message: `Follow request ${followStatus}` };
     } catch (error) {
       console.error('Error handling follow action:', error);
       return { status: 500, message: 'Internal server error' };
     }
-  }
-,
+  },
+
 
   updateProfileImage: async (request) => {
     const session = request.locals.session
@@ -146,11 +149,7 @@ export const actions = {
         .update(usersTable)
         .set({ profilePictureUrl: imageUrl })
         .where(eq(usersTable.id, session.userId));
-
-      console.log("Profile image updated successfully", imageUrl);
-    } else {
-      console.log("Failed to upload image");
-    }
+    } 
   },
 
   deleteProfileImage: async (request) => {
@@ -164,8 +163,6 @@ export const actions = {
       .update(usersTable)
       .set({ profilePictureUrl: defaultImageUrl })
       .where(eq(usersTable.id, session.userId));
-
-    console.log("Profile image set to default successfully", defaultImageUrl);
   },
 
   unfollow: async (request) => {

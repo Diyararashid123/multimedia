@@ -72,4 +72,17 @@
     align-self: end;
   }
 
+
+  @media(max-width:1326px){
+    ul{
+      justify-self: center;
+    }
+  }
+
+  @media(max-width:968px){
+    ul{
+      display: none;
+    }
+  }
+
 </style>

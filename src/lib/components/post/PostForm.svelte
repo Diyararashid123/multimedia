@@ -1,24 +1,39 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  
   let videoInput: HTMLInputElement;
   let imageInput: HTMLInputElement;
   let videoFileName: string = '';
   let imageFileName: string = '';
+  let submitBtn:HTMLButtonElement
+  import {page} from '$app/stores'
 
+  page.subscribe((value)=>{
+    if(value.form){
+      if(value.form.success){
+          submitBtn.disabled = false
+          videoFileName = '';
+          imageFileName = '';
+          videoInput.value = '';
+          imageInput.value = '';
+      }
+      else{
+        submitBtn.disabled = false
+      }
+    }
+  })
   function updateFileName() {
     videoFileName = videoInput?.files?.[0]?.name ?? '';
     imageFileName = imageInput?.files?.[0]?.name ?? '';
   }
-  function onFormSuccess() {
-    videoFileName = '';
-    imageFileName = '';
-    videoInput.value = '';
-    imageInput.value = '';
-  }
+  function handleFormSubmit() {
+    if(!submitBtn.disabled)
+     submitBtn.disabled = true;
+    }
 </script>
 
 
-<form use:enhance method="POST" action="?/post" enctype="multipart/form-data" on:submit={onFormSuccess}>
+<form use:enhance method="POST" action="?/post" enctype="multipart/form-data" on:submit={handleFormSubmit}>
   <i class="fa-solid fa-circle-user fa-2xl"></i>
   <div class="container">
     <textarea name="post-content" placeholder="How was your day?"></textarea>
@@ -56,10 +71,14 @@
           {/if}
         </button>
       </div>
-      <button class="submit-btn" type="submit">Post</button>
+      <button bind:this={submitBtn} class="submit-btn" type="submit">Post</button>
     </div>
   </div>
 </form>
+
+{#if $page.form && $page.form.error && $page.form.message}
+  <p class="error-message">{$page.form.message}</p>
+{/if}
 
 
 <style>
@@ -93,6 +112,10 @@
     background-color: var(--action);
     padding: 1rem 2rem;
     color: inherit;
+  }
+
+  .submit-btn:disabled{
+    background-color: gray;
   }
 
   textarea {
@@ -141,5 +164,16 @@
 
   i {
     color: var(--secondary);
+  }
+
+  .error-message {
+    color: red;
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 968px) {
+    form {
+      width: 80%;
+    }
   }
 </style>

@@ -6,7 +6,7 @@ import {
   usersTable,
 } from "$lib/server/schema.js";
 import { redirect } from "@sveltejs/kit";
-import { count, eq, ilike, and } from "drizzle-orm";
+import { count, eq, ilike, and, ne } from "drizzle-orm";
 
 export const load = async (request) => {
     const session = request.locals.session;
@@ -31,22 +31,36 @@ export const load = async (request) => {
       eq(userFollowsTable.follower, session.userId),
       eq(userFollowsTable.following, user.id)
     ));
-   
-  
-    const following = followResults.length > 0 && followResults[0].status === 'approved';
-    const pendingApproval = followResults.length > 0 && followResults[0].status === 'pending';
-    let allowViewing = isProfileOwner || (following && !user.isPrivate) || (following && user.isPrivate);
+    const isPublic = !user.isPrivate;
+    let allowViewing = isProfileOwner || isPublic;
+    
+    
   
     let postsCount = 0, followerCount = 0, followingCount = 0;
     if (allowViewing) {
-      const postsCountResult = await dbClient.select({value: count()}).from(postsTable).where(eq(postsTable.author, user.id));
-      postsCount = postsCountResult[0]?.value ?? 0;
-      const followerCountResult = await dbClient.select({value: count()}).from(userFollowsTable).where(eq(userFollowsTable.following, user.id));
-      followerCount = followerCountResult[0]?.value ?? 0;
-      const followingCountResult = await dbClient.select({value: count()}).from(userFollowsTable).where(eq(userFollowsTable.follower, user.id));
-      followingCount = followingCountResult[0]?.value ?? 0;
+      postsCount = await dbClient
+          .select({value: count()})
+          .from(postsTable)
+          .where(eq(postsTable.author, user.id))
+          .then(result => result[0]?.value ?? 0);
+
+      followerCount = await dbClient
+          .select({value: count()})
+          .from(userFollowsTable)
+          .where(and(eq(userFollowsTable.following, user.id), ne(userFollowsTable.status, 'pending')))
+          .then(result => result[0]?.value ?? 0);
+
+      followingCount = await dbClient
+          .select({value: count()})
+          .from(userFollowsTable)
+          .where(and(eq(userFollowsTable.follower, user.id), ne(userFollowsTable.status, 'pending')))
+          .then(result => result[0]?.value ?? 0);
     }
+
   
+const following = followResults.length > 0 && followResults[0].status === 'approved';
+const pendingApproval = followResults.length > 0 && followResults[0].status === 'pending' && !isPublic;
+
     return {
       user,
       postsCount,

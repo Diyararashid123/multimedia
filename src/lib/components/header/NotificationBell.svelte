@@ -2,16 +2,15 @@
     import type { NotificationType } from "$lib/helpers/types";
     import Notification from "../notification/Notification.svelte";
     import { fly } from "svelte/transition";
-    
-    let active = false;
+    import { notificationsBellStore } from "$lib/helpers/stores";
     export let notifications:NotificationType[] | undefined
 
 </script>
 
-    <button class="container" on:click={()=>active = !active}>
+    <button class="container" on:click={()=>$notificationsBellStore.active = !$notificationsBellStore.active}>
         <img src="/images/icons/notification-bell.png" alt="Notifications icon">
         
-            {#if active}
+            {#if $notificationsBellStore.active}
                 <div in:fly={{duration: 250, y: -50, opacity: 1}} out:fly={{duration: 250, y: -50, opacity: 0}} class="notifications-container">
                     {#if notifications && notifications?.length > 0}
                         {#each notifications as notification}
@@ -19,7 +18,7 @@
                         {/each}
                         <a href="/notifications">View All</a>
                     {:else}
-                        <p>No notifications</p>
+                        <p>No new notifications</p>
                     {/if}
                 </div>
             {/if}
@@ -54,7 +53,7 @@
     .container{
         display: flex;
         flex-direction: column;
-        z-index: 9999;
+        z-index: 999;
     }
 
     /**https://codepen.io/lideo/pen/KKGeQG*/
@@ -84,6 +83,10 @@
 
     .notifications-container > *{
         border: 1px solid var(--action)
+    }
+
+    p{
+        border: none !important;
     }
 
 </style>

@@ -33,14 +33,26 @@
       }
     })
 
-    const navigateToSource = () =>{
+    const navigateToSource = async() =>{
+      // dont really care about the result of this request so can just wing it
+      try{
+        await fetch("/api/notification",{
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({notificationId: notification.notification.id})  
+        })
+      }
+
+      catch(e){}
       goto(link) 
     }
 
 </script>
 
-<button on:click={navigateToSource}>
-  <div class="container">
+<button on:click={navigateToSource} >
+  <div class="container" class:read={notification.notification.read}>
     <div class="user">
       <img src={notification.user?.profilePictureUrl} alt="User Profile Icon"/>
       <p>{text}</p>
@@ -59,6 +71,10 @@
     border: 1px solid var(--action);
     padding: 1rem;
     border-radius: 16px;
+  }
+
+  .read{
+    border: 1px solid var(--text-secondary);
   }
 
   img{

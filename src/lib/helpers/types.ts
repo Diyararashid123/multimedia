@@ -1,4 +1,4 @@
-import type { commentsTable, postsTable, usersTable,likesPostTable, notificationsTable } from '../server/schema';
+import type { commentsTable, postsTable, usersTable,likesPostTable, notificationsTable, categoriesTable } from '../server/schema';
 
 export type UserType = Omit<typeof usersTable.$inferSelect,"password">
 export type Notification = {
@@ -12,21 +12,21 @@ export type NotificationType = {
 export type CommentType = typeof commentsTable.$inferSelect
 export type LikePost = typeof likesPostTable.$inferSelect
 export type PostType = typeof postsTable.$inferSelect
-export interface User {
-    username: string;
-    imageUrl: string;
-    firstName?: string;
-    lastName?: string;
-}
+
+
 
 export type PostWithProfile = {
+   
     post:PostType &
     {
         likeCount: number,
-        commentCount: number
+        commentCount: number,
+
+
     }, 
     author: UserType,
-    sentiment?: string
+    sentiment?: string,
+
 }
 
 export type CommentWithProfile = {

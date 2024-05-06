@@ -15,7 +15,9 @@
   let currentView: 'image' | 'video' ='image';
   export let lastPost: boolean = false;
   let lineBreak:SvelteComponent;
-  
+  let categories: any[] = [];
+
+
   $: {
     if (post.post.pictureUrl && !post.post.videoUrl) {
       currentView = 'image';
@@ -26,6 +28,7 @@
     }
   }
 
+ 
 
   // helps us with intersection observer to know when the first post has dissapeared
   export let firstPost: boolean = false;
@@ -54,15 +57,24 @@
   const navigateToPost = () => goto(`/post/${post.post.id}`);
 
   onMount(async() => {
+
+    const response = await fetch(`/api/postCategory?postId=${post.post.id}`);
+        const data = await response.json();
+        categories = data.data;
+    
+
+
+
     const req = await fetch("/api/groups")
     const res = await req.json()
     if(!res.error)  groups = res
-    
+
     const originalTime = post.post.timestamp!.getTime();
     const currTime = new Date().getTime();
     const diffHours = (currTime - originalTime) / 3600000;
 
     days = Math.floor(diffHours / 24);
+
   });
 
   // navigating between pages causes the observer to trigger because the post attached to it is no longer in the viewport
@@ -106,6 +118,7 @@
           <p class="author">{post.author.username}</p>
         {/if}
       </a>
+
       <p class="timestamp">{`.${days}d`}</p>
     </div>
 
@@ -141,7 +154,15 @@
       <img src="/images/icons/comment.png" alt="Reply Icon" />
       <p>{post.post.commentCount}</p>
     </button>
+
+      <div class="views"> 
+      <i class="fa-regular fa-eye fa-flip-vertical fa-lg"></i>
+      <p>{post.post.viewCount}</p>
   </div>
+    
+  </div>
+
+
   
   <div class="view-toggle">
     <!-- This will appear only when we have a video/picture  to show and donst work if we have single video and picture-->
@@ -159,13 +180,16 @@
         aria-label="Show Video">
       </button>
     {/if}
+    
   </div>
-  
-  
-  
-
+  <div class="categories">
+    {#each categories as item}
+      <p class="category-btn">
+        {item.name}
+      </p>
+    {/each}
   </div>
-
+</div>
 {#if !lastPost}
   <Linebreak bind:this={lineBreak}/>
 {/if}
@@ -176,7 +200,7 @@
     gap: 0.75rem;
     cursor: pointer;
     margin: auto;
-    padding: 0.35rem;
+    padding: 0rem 0.35rem ;
     border-radius: 16px;
     min-width: 100%;
     transition:
@@ -224,6 +248,12 @@
   .timestamp {
     font-size: 0.75rem;
     color: var(--text-secondary);
+  }
+
+  .views{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .post-content {
@@ -286,7 +316,7 @@
   display: flex;
   justify-content: center;
   gap: 1rem;
-  padding: 1rem 0;
+
 }
 
 .view-toggle button {
@@ -322,4 +352,25 @@
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
   }
+
+.categories{
+  display: flex;
+  gap: 0.6rem;
+  
+}
+
+  .category-btn {
+    all: unset;
+    border: 1px solid var(--action);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    background-color: var(--secondary);
+    cursor: pointer;
+    padding: 0.8rem;
+    max-width: fit-content;
+    justify-content: space-between;
+}
+
+
 </style>

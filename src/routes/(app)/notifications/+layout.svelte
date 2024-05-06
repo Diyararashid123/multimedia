@@ -20,7 +20,7 @@
         <a href="/notifications/comments"><button class:active={currentLocation === "comments"}>Comments</button></a>
         <a href="/notifications/likes"><button class:active={currentLocation === "likes"}>Likes</button></a>
         <a href="/notifications/follows"><button class:active={currentLocation === "follows"}>Follows</button></a>
-        <a href="/notifications/groups"><button class:active={currentLocation === "groups"}>Groups</button></a>
+        <a href="/notifications/requests"><button class:active={currentLocation === "requests"}>Requests</button></a>
     </div>
 
     <slot/>
@@ -30,6 +30,9 @@
     a{
         all:unset;
         color: inherit;
+    }
+    a:hover{
+        cursor: pointer;
     }
     .container{
         display: grid;

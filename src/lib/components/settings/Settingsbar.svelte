@@ -72,4 +72,10 @@
     background-color: var(--action);
     width: 2px;
   }
+
+  @media(max-width: 1326px){
+    .description{
+      display: none;
+    }
+  }
 </style>

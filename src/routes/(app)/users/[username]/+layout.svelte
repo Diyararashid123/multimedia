@@ -4,28 +4,78 @@
   import ProfileSections from "$lib/components/profile/ProfileSections.svelte";
   import Linebreak from "$lib/components/Linebreak.svelte";
   import { onMount } from "svelte";
+  import FollowsModal from "$lib/components/profile/FollowsModal.svelte";
 
 
   export let data;
   let showProfileOptions = false;
   let name: string = "";
+  let showFollowers = false;
+  let showFollowing = false;
 
   function toggleProfileOptions() {
     showProfileOptions = !showProfileOptions;
   }
   let isProcessing = false;
 
-  async function handleFollow() {
-    isProcessing = true;
-    const response = await fetch(`/users/${data.user.username}/?/follow`, { method: 'POST' });
+
+
+async function handleFollow() {
+  isProcessing = true;
+  const formData = new FormData()
+  formData.append('userId', data.user.id); 
+  const response = await fetch(`/users/${data.user.username}/?/follow`, {
+    method: 'POST',
+    body: formData 
+  });
     if (response.ok) {
     
-      console.log("Follow request sent");
+      const updatedData = await response.json(); 
+
+      data = { ...data, following: updatedData.following, pendingApproval: updatedData.pendingApproval };
+      window.location.reload();
     } else {
-      console.error("Failed to send follow request");
+      console.error("Failed to initiate follow");
     }
     isProcessing = false;
   }
+
+  async function handleUnfollow() {
+    isProcessing = true;
+   
+  const formData = new FormData()
+  formData.append('userId', data.user.id); 
+  const response = await fetch(`/users/${data.user.username}/?/unfollow`, {
+    method: 'POST',
+    body: formData 
+  });
+    if (response.ok) {
+      const updatedData = await response.json();
+      window.location.reload();
+      data = { ...data, following: updatedData.following, pendingApproval: false }; 
+     
+    } else {
+      console.error("Failed to unfollow");
+    }
+    isProcessing = false;
+  }
+
+
+
+
+  const toggleFollowers = () => {
+    showFollowers = !showFollowers;
+  }
+
+  const toggleFollowing = () => {
+    showFollowing = !showFollowing;
+  }
+
+
+
+
+
+
   onMount(()=>{
     name = (data.user.firstName || "") + (data.user.lastName ? " " + data.user.lastName : "");
   })
@@ -101,21 +151,17 @@
     </div>
     <div class="stats">
       <span class="post-counter">{data.postsCount} posts</span>
-      <span class="follower-counter">{data.followerCount} followers</span>
-      <span class="following-counter">{data.followingCount} following</span>
+      <button on:click={()=>showFollowers = !showFollowers} class="follow-count">{data.followerCount} followers</button>
+      <button on:click={()=>showFollowing = !showFollowing} class="follow-count">{data.followingCount} following</button>
       {#if !data.personalProfile}
-        {#if data.pendingApproval}
-          <button disabled class="followBtn">Pending Approval</button>
-        {:else if data.following}
-        <form use:enhance method="post" action={`/users/${data.user.username}/?/follow`}>
-          <button on:click={handleFollow} disabled={isProcessing || data.pendingApproval || data.following}>
-            {data.pendingApproval ? 'Pending Approval' : (data.following ? 'Unfollow' : 'Follow')}
-          </button>
-        </form>
-        {:else}
-          <button on:click={handleFollow} disabled={isProcessing} class="followBtn">Follow</button>
-        {/if}
+      {#if data.pendingApproval}
+        <button disabled class="followBtn">Pending Approval</button>
+      {:else if data.following}
+        <button on:click={handleUnfollow} disabled={isProcessing} class="followBtn">Unfollow</button>
+      {:else}
+        <button on:click={handleFollow} disabled={isProcessing} class="followBtn">Follow</button>
       {/if}
+    {/if}
     </div>
     {#if data.user.bio}
       <p class="description">{data.user.bio}</p>
@@ -123,6 +169,14 @@
   </div>
 
   <ProfileSections username={data.user.username} />
+
+  {#if showFollowers}
+    <FollowsModal userId={data.user.id} isPrivate={data.allowViewing} type="followers" toggleFunc={toggleFollowers}/>
+  {/if}
+
+  {#if showFollowing}
+    <FollowsModal userId={data.user.id} isPrivate={data.allowViewing} type="following" toggleFunc={toggleFollowing} />
+  {/if}
 
   <slot />
 {/if}
@@ -263,5 +317,11 @@
     justify-content: center;
     border: none;
     font-size: 1rem;
+  }
+
+  .follow-count{
+    all: unset;
+    cursor: pointer;
+    color: white;
   }
 </style>

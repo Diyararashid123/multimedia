@@ -46,6 +46,7 @@ async function fetchNotifications(notifications: NotificationType[]){
             row = (await dbClient.select({content: commentsTable.comment, parentId: commentsTable.post}).from(commentsTable).where(eq(commentsTable.id, notif.notification.entityId)))[0]
         }
 
+        if(!row) continue
         if(row.content || row.parentId){
             if(row.content) row.content.length > 30 ? row.content = row.content.slice(0, 29) + "..." : ""
             
@@ -56,5 +57,11 @@ async function fetchNotifications(notifications: NotificationType[]){
         data.push(notif)
     }
 
-    return data
+    // sort the array by unread notifications
+    return data.sort((a, b) => {
+        if (a.notification.read === b.notification.read) {
+            return 0; // If both notifications have the same read status, keep their order
+        }
+        return a.notification.read ? 1 : -1; // Sort by read status (false comes before true)
+    });
 }

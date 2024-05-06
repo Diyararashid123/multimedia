@@ -134,8 +134,15 @@
 <style>
   .container {
     display: grid;
+    height: 70%;
     place-items: center;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
+    font-size: 1rem;
+  }
+
+  .container > *{
+    height: auto;
   }
 
   .title {
@@ -155,7 +162,7 @@
     background-color: transparent;
     border: none;
     color: inherit;
-    font: inherit;
+    font: 1rem;
     resize: none;
     transition: border-radius 0.5s;
   }
@@ -175,7 +182,7 @@
     border: none;
     border-radius: 0.5rem;
     font-family: inherit;
-    font-size: inherit;
+    font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
   }

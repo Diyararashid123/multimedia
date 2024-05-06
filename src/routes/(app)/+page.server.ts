@@ -10,13 +10,14 @@ import {
   usersTable,
   notificationsTable,
 } from "$lib/server/schema";
-import type { PostType, PostWithProfile } from "$lib/helpers/types.js";
-import { redirect } from "@sveltejs/kit";
+import type { PostWithProfile } from "$lib/helpers/types.js";
+import { error, redirect, type Actions } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { SUPABASE_URL, KEY,API_KEY } from "$env/static/private";
+import { SUPABASE_URL, KEY} from "$env/static/private";
 import { createClient } from "@supabase/supabase-js";
-import OpenAI from "openai";
+
+const supabase = createClient(SUPABASE_URL, KEY);
 
 export const load = async (request) => {
  
@@ -51,7 +52,7 @@ export const load = async (request) => {
   } else if (userPreference === "mediaOnly") {
     rows = await getMediaPosts();
   } else {
-    rows = await getPosts();
+    rows = await getPosts(0);
   }
 
   rows = rows.filter((data) => data.author && data.post) as PostWithProfile[];
@@ -62,84 +63,101 @@ export const load = async (request) => {
 }; 
  
 
-export const actions = {
+export const actions:Actions = {
   post: async (request) => {
     const session = request.locals.session;
-    if (!session) throw redirect(301, "/");
+    if (!session) throw redirect(301, "/login");
 
     const data1 = await request.request.formData();
     
     const postContent = data1.get("post-content")?.toString();
-    const postAuthor = session.userId;
-    if (!postAuthor || !postContent) {
-      return { error: "missing field" };
+    if (!postContent) {
+      return {error: true, message: "Missing field required" };
     }
 
-    const date = new Date();
     let videoUrl: string | null = null;
-    const imageUUID = uuidv4();
-    const videoUUID = uuidv4();
-    const fileName1 = `post_video_${videoUUID}.mp4`;
-    const fileName = `image_${imageUUID}.JPG`;
+    let imageUrl: string | null = null;
+
     const img = data1.get("pictureUrl") as File;
     const video = data1.get("video") as File;
-    let pictureUrl: string | null = null;
-    if (img.size > 0) {
-      const supabase = createClient(SUPABASE_URL, KEY);
-      const { data, error } = await supabase.storage
-        .from("test2")
-        .upload(fileName, img, {
-          cacheControl: "3600",
-          upsert: true,
-        });
 
-      if (error) {
-        console.error("Upload error", error);
-        return;
+    if(img || video){
+      const imageUUID = uuidv4();
+      const videoUUID = uuidv4();
+      const videoFileName = `post_video_${videoUUID}.mp4`;
+      const imageFileName = `image_${imageUUID}.JPG`;
+
+      if (img.size > 0) {
+        const { error } = await supabase.storage
+          .from("test2")
+          .upload(imageFileName, img, {
+            cacheControl: "3600",
+            upsert: true,
+          });
+
+        if (error) return {error: true, message: "Error uploading image: " + error.message};
+        imageUrl = `https://ikcxvcutdjftdsvbpwsa.supabase.co/storage/v1/object/public/test2/${imageFileName}`;
       }
 
-      if (data) {
-        pictureUrl = `https://ikcxvcutdjftdsvbpwsa.supabase.co/storage/v1/object/public/test2/${fileName}`;
-      }
-    }
+      if (video.size > 0) {
+        const supabase = createClient(SUPABASE_URL, KEY);
+        const { error } = await supabase.storage
+          .from("test2")
+          .upload(videoFileName, video, {
+            cacheControl: "3600",
+            upsert: true,
+          });
 
-    if (video.size > 0) {
-      const supabase = createClient(SUPABASE_URL, KEY);
-      const { data, error } = await supabase.storage
-        .from("test2")
-        .upload(fileName1, video, {
-          cacheControl: "3600",
-          upsert: true,
-        });
-
+        if (error) return {error: true, message: "Error uploading video: " + error.message};
+        videoUrl = `https://ikcxvcutdjftdsvbpwsa.supabase.co/storage/v1/object/public/test2/${videoFileName}`;
         
-      if (error) {
-        console.error("Upload error", error);
-        return;
-      }
-
-      if (data) {
-        videoUrl = `https://ikcxvcutdjftdsvbpwsa.supabase.co/storage/v1/object/public/test2/${fileName1}`;
       }
     }
+
     const newPostId = uuidv4() 
     const newPost = {
       id: newPostId,
       content: postContent,
       videoUrl: videoUrl,
-      pictureUrl: pictureUrl,
-      author: postAuthor,
-      timestamp: date,
+      pictureUrl: imageUrl,
+      author: session.userId,
+      timestamp: new Date(),
     };
-    const createPost = await dbClient.insert(postsTable).values(newPost);
+
+    const req = await request.fetch("/api/ai/profanity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ postId: newPostId, content: postContent }),
+    });
+
+    const res = await req.json();
+    if (res.error) {
+      return { error: true, message: "Failed to upload post. Please try again later" };
+    }
+
+    if(res.response === "N") return {error: true, message: "Post contains inappropriate content."}
+
+    try{
+      await dbClient.insert(postsTable).values(newPost);
+    }
+    catch(error){
+      return {error: true, message: "Error inserting post: "};
+    }
+    
 
     await request.fetch("/api/ai/categorize",{
       method: "POST",
       headers:{
         "Content-Type": "application/json",
       },
-      body:JSON.stringify({postId: newPostId})
+      body:JSON.stringify({postId: newPostId, content: postContent})
     })
+
+    return { success: true };
+
+    
   },
 
   comment: async (request) => {
