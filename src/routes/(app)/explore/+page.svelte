@@ -12,7 +12,7 @@
 
   $: disableLeft = startIndex <= 0;
 
-  $: loaded = false;
+
   $: disableRight = startIndex + usersToShow >= data.recommendedUsers.length;
 
   function moveRight() {
@@ -24,45 +24,54 @@
   }
 
   $: visibleUsers = data.recommendedUsers.slice(startIndex, startIndex + usersToShow).map(r => r.user);
-
-
 </script>
 
+<Search />
+<div class="container">
+  <button 
+    class="navigation-button left" 
+    on:click={moveLeft}
+    disabled={disableLeft}
+  >&lt;</button>
 
-
-  <Search />
-  <div class="container">
-    <button class="navigation-button left" on:click={moveLeft} disabled={disableLeft}>&lt;</button>
-    <div class="grid">
-      {#each visibleUsers as user (user.username)}
-        <a href={`/users/${user.username}`} class="user-link">
-          <div class="user" style="background-image: url({user.profileBackgroundUrl});">
-            <div class="info">
-              <img src={user.profilePictureUrl} alt="{user.username}'s profile picture" />
-              <p>{user.username}</p>
-              <p class="bio">{user.bio && user.bio.length > 25 ? user.bio.slice(0, 25) + '...' : (user.bio ? user.bio : '')}</p>
-            </div>
-          </div>
-        </a>
-      {/each}
-    </div>
-    <button class="navigation-button right" on:click={moveRight} disabled={disableRight}>&gt;</button>
+  <div class="grid">
+    {#each visibleUsers as user (user.username)}
+    <a href={`/users/${user.username}`} class="user-link">
+    <div class="user" style="background-image: url({user.profileBackgroundUrl});"> 
+        <div class="info">
+          <img class = "header-img skeleton" src={user.profilePictureUrl} alt="{user.username}'s profile picture" /> 
+          <p>{user.username}</p>
+          <p class="bio">{user.bio && user.bio.length > 25 ? user.bio.slice(0, 25) + '...' : (user.bio ? user.bio : '')}</p>
+        </div>
+    
+    </a>
+    {/each}
   </div>
-  {#if data?.recommendedUsers?.length === 0}
-    <p>No users found.</p>
-  {/if}
-  {#await data?.streamed?.allPosts}
-    <LoadingSpinner/>
-  {:then allPosts}
-    <div class="posts-container">
-      {#each allPosts as post, i}
-        {#if post}
-          <Post {post} firstPost={i === 0} lastPost={i === allPosts.length - 1} />
-        {/if}
-      {/each}
-    </div>
-  {/await}
 
+  <button 
+    class="navigation-button right" 
+    on:click={moveRight}
+    disabled={disableRight}
+  >&gt;</button>
+</div>
+
+{#if data.recommendedUsers.length === 0}
+  <p>No users found.</p>
+{/if}
+
+{#await data.streamed.allPosts}
+<LoadingSpinner/>
+{:then allPosts}
+
+<div class="posts-container">
+  {#each allPosts as post, i}
+      {#if post}
+      <Post {post} firstPost={i === 0} lastPost={i === allPosts.length - 1} />
+      {/if}
+  {/each}
+</div>
+
+{/await}
 
 <style>
 .container {
@@ -115,7 +124,7 @@
   gap: 5px; 
 }
 
-img {
+.header-img {
   width: 1.8rem; 
   height: 2rem;
   border-radius: 50%;

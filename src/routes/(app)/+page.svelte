@@ -10,11 +10,24 @@
   let categories: HTMLDivElement;
   let postsEnd:HTMLDivElement;
 
+  let firstPostId: string;
+
   let skipCount = 5;
   let loading: boolean = false;
-    let observer: IntersectionObserver | null = null;
+  let observer: IntersectionObserver | null = null;
+
+
+  // any data fetched inside onmount is being inherited by new posts
+  //until that is fixed that just gonna force refresh when the id of the first post changes aka a new post is added
+  $:if(data){
+    if(data.rows[0].post.id !== firstPostId && firstPostId && firstPostId.length > 0){
+      window.location.reload();
+    }
+  }
 
   onMount(()=>{
+
+    firstPostId = data.rows[0].post.id;
     observer = new IntersectionObserver(entries =>{
       if(entries[0].isIntersecting){
        fetchPosts()

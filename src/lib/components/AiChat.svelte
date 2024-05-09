@@ -52,6 +52,33 @@
     })
     messages = messages;
 
+    const _req = await fetch("/api/ai/profanity",{
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            content: chatInput.value
+        })
+
+    })
+    const _res = await _req.json()
+    if(_res.success && _res.response === "N"){
+        messages.push({
+            text: "Please do not use profanity",
+            from: "bot"
+        })
+        messages = messages;
+
+        setTimeout(() => {
+            messages = messages.splice(0, 1)
+            chatInput.value = ""
+            chatInput.disabled = false;
+        }, 1000);
+
+        return
+    }
+
     const req = await fetch("/api/ai/help", {
         method: "POST",
         headers: {

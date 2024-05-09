@@ -9,6 +9,13 @@
 
     let activeReply:boolean = false;
     export let postId: string;
+    let days:string;
+    let replyErrorMessage:string = "";
+
+
+    $:{
+        console.log(replyErrorMessage)
+    }
 
     const navigateToComment = () =>{
         goto(`/post/${postId}/${comment.comment.id}`)
@@ -37,6 +44,37 @@
     const data = await fetch(`/api/likes/CommentLikes?id=${comment.comment.id}`)
     const res = await data.json()
     liked = res.liked;
+
+    let originalTime;
+    // IDK WHY ITS INCONSISTENT 
+    if (typeof comment.comment.date === 'string') {
+      // If the timestamp is a string (e.g., ISO format)
+      originalTime = new Date(comment.comment.date);
+    } else {
+      // If the timestamp is a Date object
+      originalTime = comment.comment.date;
+    }
+    const currTime = new Date();
+    const originalTimeValue = comment.comment.date!;
+    let time: number | undefined;
+    let difference: number;
+
+    time = new Date(originalTimeValue).getTime();
+    difference = currTime.getTime() - time;
+
+    if (difference < 60000) { // Less than 1 minute
+      const minutes = Math.floor(difference / 1000 / 60);
+      days = `${minutes}m`;
+    } else if (difference < 3600000) { // Less than 1 hour
+      const minutes = Math.floor(difference / 1000 / 60);
+      days = `${minutes}m`;
+    } else if (difference < 86400000) { // Less than 1 day
+      const hours = Math.floor(difference / 1000 / 60 / 60);
+      days = `${hours} h`;
+    } else { // 1 day or more
+      const _days = Math.floor(difference / 1000 / 60 / 60 / 24);
+      days = `${_days} d`;
+    }
     })
 
 </script>
@@ -48,7 +86,7 @@
     <div class="comment-author" on:click|self={navigateToComment}>
             <img class="profile-image" src={comment.author.profilePictureUrl} alt="Profile icon"/>
             <p class="author">{comment.author.username}</p>
-            <p class="timestamp">{`.${"3"}d`}</p>
+            <p class="timestamp">{`.${days}`}</p>
     </div>
 </a>
     <div class="comment-content">{comment.comment.comment}</div>
@@ -64,9 +102,13 @@
             <p>{comment.comment.replyCount}</p>
         </div>
     </div>
-   
+
     {#if activeReply}
-        <ReplyForm commentId={comment.comment.id} {postId}/>
+        <ReplyForm commentId={comment.comment.id} {postId} {replyErrorMessage}/>
+    {/if}
+
+    {#if replyErrorMessage.length > 0}
+        <p class="error-message">{replyErrorMessage}</p>
     {/if}
 </div>
 
@@ -74,6 +116,15 @@
     .comment-container{
         display: grid;
         gap: 0.75rem;
+    }
+
+    .error-message{
+        color: red;
+    }
+
+    a{
+        text-decoration: none;
+        color: inherit;
     }
     .comment-author{
         display: flex;
@@ -121,8 +172,5 @@
         justify-content: center;
         align-items: center;
     }
-    a{
-        text-decoration: none;
-        color: inherit;
-    }
+    
 </style>

@@ -2,7 +2,7 @@
 <div class="skeleton-container">
   <div class="skeleton-header"></div>
   <div class="skeleton-grid">
-    {#each Array(3) as _} <!-- Mimic the number of visible users -->
+    {#each Array(3) as _} 
       <div class="skeleton-user">
         <div class="skeleton-image"></div>
         <div class="skeleton-text"></div>
@@ -11,7 +11,7 @@
     {/each}
   </div>
 </div>
-{#each Array(9) as _, index} <!-- Mimic post cards -->
+{#each Array(9) as _, index} 
 <div class="skeleton-post">
   <div class="skeleton-post-image"></div>
   <div class="skeleton-post-details">
@@ -26,7 +26,7 @@
 
 <style>
   .skeleton-post {
-  background-color: #e0e0e0;
+  background-color: var(--text-secondary);
   border-radius: 8px;
   padding: 10px;
   margin: 10px 0;
@@ -36,7 +36,7 @@
 
 .skeleton-post-image {
   height: 150px; 
-  background-color: #ccc;
+  background-color: var(--background);
   border-radius: 8px;
   margin-bottom: 8px;
 }
@@ -70,7 +70,7 @@
   .skeleton-header {
     height: 20px;
     width: 80%;
-    background-color: #ccc;
+    background-color: var(--text-secondary);
     border-radius: 8px;
   }
   .skeleton-grid {
@@ -80,7 +80,7 @@
     grid-auto-columns: minmax(10rem, 1fr);
   }
   .skeleton-user {
-    background-color: #e0e0e0;
+    background-color: var(--text-secondary);
     height: 120px;
     border-radius: 0.75rem;
     padding: 0.3rem;
@@ -93,12 +93,13 @@
     width: 1.8rem;
     height: 2rem;
     border-radius: 50%;
-    background-color: #ccc;
+    background-color: #e0e0e0;
     margin-bottom: 4px; 
 }
+
 .skeleton-text {
     height: 10px;
-    background-color: #ccc;
+    background-color: #e0e0e0;
     width: 70%; 
     border-radius: 4px;
     margin-bottom: 4px; 
@@ -109,14 +110,14 @@
 }
   @keyframes skeleton-loading {
   0% {
-    background-color: hsl(200, 20%, 70%);
+    background-color: #999999;
   }
   100% {
-    background-color: hsl(200, 20%, 95%);
+    background-color: #737575;
   }
 }
 
-.skeleton-text, .skeleton-image {
-  animation: skeleton-loading 1.5s ease-in-out infinite alternate;
+.skeleton-text, .skeleton-image,.skeleton-post-image {
+  animation: skeleton-loading 2s ease-in-out infinite alternate;
 }
 </style>

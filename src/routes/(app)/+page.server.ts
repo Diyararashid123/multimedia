@@ -11,7 +11,7 @@ import {
   notificationsTable,
 } from "$lib/server/schema";
 import type { PostWithProfile } from "$lib/helpers/types.js";
-import { error, redirect, type Actions } from "@sveltejs/kit";
+import { error, fail, redirect, type Actions } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { SUPABASE_URL, KEY} from "$env/static/private";
@@ -169,24 +169,41 @@ export const actions:Actions = {
     const date = new Date();
     const postId = data.get("post_id")?.toString();
 
-    if (!postId) {
-      return { status: 401, success: false };
+    if (!postId || !commentContent) {
+      return fail(400,{message: "Missing field required"})
     }
+
+    const req = await request.fetch("/api/ai/profanity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content: commentContent }),
+    });
+
+    const res = await req.json();
+
+    if (res.error) {
+      return fail(400,{message: "Error submitting comment. Please try again later."})
+    }
+
+    if(res.response === "N") return fail(400,{message: "Comment contains inappropriate content."})
+
 
     const newCommentId = uuidv4();
     if (commentContent && commentAuthor) {
-      const newComment: typeof commentsTable.$inferInsert = {
-        id: newCommentId,
-        comment: commentContent,
-        author: commentAuthor,
-        post: postId,
-        date: date,
-      };
-      const createComment = await dbClient
-        .insert(commentsTable)
-        .values(newComment);
+      try{
+          const newComment: typeof commentsTable.$inferInsert = {
+            id: newCommentId,
+            comment: commentContent,
+            author: commentAuthor,
+            post: postId,
+            date: date,
+        };
+          await dbClient
+          .insert(commentsTable)
+          .values(newComment);
 
-      if (createComment) {
         const targetUser = await dbClient
           .select({ userId: usersTable.id })
           .from(postsTable)
@@ -202,7 +219,11 @@ export const actions:Actions = {
               entityType: "comment",
             });
           }
-
+          return { success: true };
+      }
+    
+      catch(e){
+        return fail(400,{message: "Error submitting comment. Please try again later."})
       }
     }
   },
@@ -218,11 +239,25 @@ export const actions:Actions = {
     const date = new Date();
     const parentCommentId = data.get("parent_comment_id")?.toString();
 
-    if (!parentCommentId || !postId) {
-      return { status: 401, success: false };
+    if (!parentCommentId || !postId || !replyContent) {
+      return fail(400,{message: "Missing field required"})
     }
     
-    if (replyContent && replyAuthor) {
+    const req = await request.fetch("/api/ai/profanity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content: replyContent }),
+    });
+    const res = await req.json();
+    if(res.error){
+      return fail(400,{message: "Error submitting comment. Please try again later."})
+    }
+    if(res.response === "N") return fail(400,{message: "Content contains profanity."})
+
+      try{
+if (replyContent && replyAuthor) {
       const replyId = uuidv4();
       const newComment: typeof commentsTable.$inferInsert = {
         id: replyId,
@@ -253,6 +288,14 @@ export const actions:Actions = {
             });
           }
       }
+
+      return { success: true };
     }
+      }
+      catch(e){
+        return fail(400,{message: "Error submitting comment. Please try again later."})
+      }
+
+    
   },
 };

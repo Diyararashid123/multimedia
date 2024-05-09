@@ -1,18 +1,48 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
+  import { invalidate } from "$app/navigation";
   
       export let commentId:string;
       export let postId:string;
+      let errorMessage:string = "";
+      let commentTextArea:HTMLTextAreaElement;
+      let submitBtn:HTMLButtonElement;
+      export let replyErrorMessage:string = "";
+
+      const handleFormSubmit = () =>{
+            replyErrorMessage = "";
+            if(!submitBtn.disabled)
+            submitBtn.disabled = true;
+      }
   </script>
   
   
-  <form method="post" action="/?/reply" use:enhance>
-      <textarea name="reply-content" placeholder="Add reply..."></textarea>
-      <button class="submit-btn" type="submit">Reply</button>
+  <form method="post" action="/?/reply" use:enhance={()=>{
+    return async({result})=>{
+        submitBtn.disabled = false;
+        if(result.type==="error"){
+            replyErrorMessage = "Failed to send comment";
+        }
+        else if (result.type === "success"){
+            replyErrorMessage = "";
+            commentTextArea.value = "";
+            commentTextArea.focus();
+            invalidate("/post/"+postId + "/" + commentId)
+
+        }
+    }
+
+}} on:submit={handleFormSubmit}>
+      <textarea bind:this={commentTextArea} name="reply-content" placeholder="Add reply..."></textarea>
+      <button bind:this={submitBtn} class="submit-btn" type="submit">Reply</button>
       <input type="hidden" name="parent_comment_id" value={`${commentId}`}/>
       <input type="hidden" name="postId" value={`${postId}`}/>
       
   </form>
+
+{#if errorMessage.length > 0}
+  <p class="error-message">{errorMessage}</p>
+{/if}
   
   
   
@@ -48,4 +78,11 @@
           width: 25%;
           justify-self: flex-end;
       }
+
+        .submit-btn:disabled{
+            background-color: gray;
+        }
+        .error-message{
+            color: red;
+        }
   </style>

@@ -32,8 +32,8 @@
     }
 </script>
 
-
-<form use:enhance method="POST" action="?/post" enctype="multipart/form-data" on:submit={handleFormSubmit}>
+<!--Weird bugs with post component not getting the right data when the load function is revalidated so we will force page refresh in the page store -->
+<form method="POST" use:enhance action="?/post" enctype="multipart/form-data" on:submit={handleFormSubmit}>
   <i class="fa-solid fa-circle-user fa-2xl"></i>
   <div class="container">
     <textarea name="post-content" placeholder="How was your day?"></textarea>

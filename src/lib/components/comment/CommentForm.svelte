@@ -1,16 +1,45 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import { invalidate } from "$app/navigation";
+  import {page} from '$app/stores'
+  export let postId:string;
+  let submitBtn:HTMLButtonElement;
+  let errorMessage:string = "";
+  let commentTextArea:HTMLTextAreaElement;
 
-    export let postId:string;
+    function handleFormSubmit() {
+    errorMessage = "";
+    if(!submitBtn.disabled)
+     submitBtn.disabled = true;
+    }
+
 </script>
 
 
-<form method="post" action="/?/comment" use:enhance>
-    <textarea name="comment-content" placeholder="Add comment..."></textarea>
-    <button class="submit-btn" type="submit">Comment</button>
+<form method="post" action="/?/comment" use:enhance={()=>{
+    return async({result})=>{
+        submitBtn.disabled = false;
+        if(result.type==="failure"){
+            errorMessage = "Failed to send comment";
+        }
+        else if (result.type === "success"){
+            errorMessage = "";
+            commentTextArea.value = "";
+            commentTextArea.focus();
+            invalidate("/post/"+postId)
+
+        }
+    }
+
+}} on:submit={handleFormSubmit}>
+    <textarea bind:this={commentTextArea} name="comment-content" placeholder="Add comment..."></textarea>
+    <button bind:this={submitBtn} class="submit-btn" type="submit">Comment</button>
     <input type="hidden" name="post_id" value={`${postId}`}/>
 </form>
 
+{#if errorMessage.length > 0}
+  <p class="error-message">{errorMessage}</p>
+{/if}
 
 
 <style>
@@ -43,5 +72,12 @@
         padding: 0.5rem 1rem;
         color: inherit;
         justify-self: flex-end;
+    }
+
+    .submit-btn:disabled{
+        background-color: gray;
+    }
+    .error-message{
+        color: red;
     }
 </style>
