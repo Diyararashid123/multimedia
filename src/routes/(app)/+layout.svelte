@@ -7,7 +7,9 @@
   import { mainContainerStore, AiChatStore, postOptionsStore, notificationsBellStore } from "$lib/helpers/stores";
   import MobileHeader from "$lib/components/header/MobileHeader.svelte";
   import AiChat from "$lib/components/AiChat.svelte";
+  import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 
+injectSpeedInsights();
 
   export let data;
   let main: HTMLDivElement;
@@ -28,6 +30,7 @@
     <main on:click|self={toggleElements}>
         <Sidenav user={data.user?.username}/>
         <div bind:this={main} class="main-container">
+          
             <slot/>
         </div>
         <!-- svelte-ignore missing-declaration -->
